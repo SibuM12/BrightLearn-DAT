@@ -1,0 +1,82 @@
+-- Revenue per transaction
+SELECT transaction_id,
+       transaction_qty*unit_price AS revenue
+FROM sales.retail.bright_coffee;
+
+-- Remember that with theID's we use the COUNT NOT SUM
+-- This is the total number of sales/transactions made
+SELECT COUNT(transaction_id) AS number_of_transactions
+FROM sales.retail.bright_coffee;
+
+-- Count the number of different shops we have in this data
+SELECT COUNT(DISTINCT store_id) AS number_of_shops
+FROM sales.retail.bright_coffee;
+
+-- To show us the name of the different store locations which is actually 3 different shops
+SELECT DISTINCT store_location, store_id
+FROM sales.retail.bright_coffee;
+
+-- How to calculate revenue by store location
+SELECT store_location,
+       SUM(transaction_qty*unit_price) AS revenue
+FROM sales.retail.bright_coffee
+GROUP BY store_location;
+
+-- What time does the shop opens
+SELECT MIN(transaction_time) opening_time 
+FROM sales.retail.bright_coffee;
+
+-- What time does the shop closes
+SELECT MAX(transaction_time) closing_time 
+FROM sales.retail.bright_coffee;
+
+SELECT product_category,
+       SUM(transaction_qty*unit_price) AS revenue,
+       store_location,
+       transaction_date,
+       transaction_time,
+       CASE
+            WHEN transaction_time BETWEEN '06:00:00' AND '11:59:59' THEN '01. Morning'
+            WHEN transaction_time BETWEEN '12:00:00' AND '15:59:59' THEN '02. Aftenoon'
+            WHEN transaction_time BETWEEN '16:00:00' AND '19:59:59' THEN '03. Evening'
+            WHEN transaction_time >= '20:00:00'  THEN '04. Night'
+        END AS time_bucket
+FROM sales.retail.bright_coffee
+WHERE transaction_date>'2023-05-01'
+GROUP BY product_category,
+         store_location,
+         transaction_date,
+         time_bucket,
+         transaction_time
+ORDER BY revenue DESC;
+
+SELECT*
+FROM sales.retail.bright_coffee;
+
+
+SELECT transaction_date,
+       YEAR(transaction_date) AS year,
+       DAYOFMONTH(transaction_date) AS day_of_month,
+       MONTH(transaction_date) AS month,
+       TO_CHAR(transaction_date, 'YYYYMM') AS month_id,
+       
+FROM sales.retail.bright_coffee;    
+
+SELECT transaction_date,
+       YEAR(transaction_date) AS year,
+       MONTH(transaction_date) AS month,
+       MONTHNAME(transaction_date) AS monthname,
+       DAYOFMONTH(transaction_date) AS day_of_month,
+       DAYNAME(transaction_date) AS day_name,
+
+       CASE
+           WHEN day_name NOT IN ('Sat', 'Sun') THEN 'weekday'
+           ELSE 'weekend'
+       END AS day_of_week_classification,    
+       
+       store_location,
+       SUM(transaction_qty*unit_price) AS revenue
+FROM sales.retail.bright_coffee
+GROUP BY ALL;
+
+SELECT MONTH('2025-06-02') AS month;
